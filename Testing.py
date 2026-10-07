@@ -29,3 +29,5 @@ print(f"Aromaticity: {aromaticity:.3f}")
 print(f"Instability Index: {instability_index:.2f} ({'Instable' if instability_index > 40 else 'Stable'})")
 print(f"GRAVY (Hydropathicity): {gravy:.3f}")
 print(f"Alanine Count: {aa_count['A']}")
+
+print("Testing completed successfully")
