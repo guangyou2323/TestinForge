@@ -1,0 +1,32 @@
+We 
+
+OpenCV (Open Source Computer Vision Library) is an open-source computer vision and machine learning software library. In Python, it is packaged as opencv-python and imported in scripts as cv2.
+
+1. Installation
+You can install the core library via pip:    pip install opencv-python
+
+2. Core Python Implementations; handling images using OpenCV:
+
+A. Basic Image I/O (Read, Display, Save)
+OpenCV reads images as NumPy arrays in BGR (Blue, Green, Red) format instead of the standard RGB:
+import cv2
+img = cv2.imread('image.jpg')
+cv2.imshow('Window Title', img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+cv2.imwrite('output.jpg', img)
+
+B. Image Manipulations:
+gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+resized_img = cv2.resize(img, (640, 480))
+cropped_img = img[100:300, 200:400]
+Use code with caution.
+
+Quick Function Reference
+Function	Purpose	Key Parameter
+cv2.imread()	Loads an image from a file.	Path string
+cv2.imshow()	Displays an image in a window.	Window name, Image matrix
+cv2.cvtColor()	Changes image color frameworks.	Transformation code (e.g., cv2.COLOR_BGR2GRAY)
+cv2.VideoCapture()	Opens a video file or grabs camera stream.	Camera index (integer) or video file path
+cv2.waitKey()	Waits for a keyboard event.	Delay in milliseconds (0 = forever)
