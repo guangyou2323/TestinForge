@@ -1,5 +1,3 @@
-/*this is a program modified by deepseek with me monitoring its work*/
-/*this is one without css, plz notice*/
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,72 +8,29 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
+        /* 基礎樣式保持不變，等待隊友替換 */
         .screen { display: none; } 
         .screen.active { display: block; }
         body { margin: 0; font-family: sans-serif; background-color: #f5f5f5; }
-        
         .btn-style { padding: 10px 15px; margin: 5px; cursor: pointer; border-radius: 5px; border: 1px solid #ccc; background: #fff; display: inline-block; }
-        
-        /* ===== 相機取景框樣式 ===== */
-        .camera-viewfinder { 
-            position: relative; 
-            display: flex; 
-            justify-content: center; 
-            margin: 20px 0; 
-            background: #000;
-            width: 100%;
-            max-width: 400px;
-            margin: 20px auto;
-            overflow: hidden;
-            border-radius: 10px;
-        }
+        .camera-viewfinder { position: relative; display: flex; justify-content: center; margin: 20px auto; background: #000; width: 100%; max-width: 400px; overflow: hidden; border-radius: 10px; }
         #camera-stream { width: 100%; display: block; }
-        
-        /* 遮罩層和取景框 */
-        .camera-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            pointer-events: none; /* 让點擊事件穿透 */
-        }
-        .focus-frame {
-            width: 60%; /* 取景框大小 */
-            aspect-ratio: 1 / 1; /* 正方形 */
-            border: 2px dashed #fff;
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5); /* 遮罩效果 */
-            position: relative;
-        }
-        .focus-frame::after {
-            content: "Align pH Paper Here";
-            position: absolute;
-            bottom: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #fff;
-            font-size: 12px;
-            white-space: nowrap;
-        }
-        
-        /* 其他樣式保持不變 */
+        .camera-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; pointer-events: none; }
+        .focus-frame { width: 60%; aspect-ratio: 1 / 1; border: 2px dashed #fff; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5); position: relative; }
+        .focus-frame::after { content: "Align pH Paper Here"; position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 12px; white-space: nowrap; }
         .result-box { padding: 20px; text-align: center; border-radius: 10px; margin: 20px 0; border: 2px solid #ccc; }
         .status-fresh { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
         .status-edible { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
         .status-spoiled { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
-
         .progress-container { width: 100%; background-color: #e0e0e0; border-radius: 5px; margin: 20px 0; overflow: hidden; height: 15px;}
         .progress-bar { height: 100%; background-color: #007bff; width: 0%; transition: width 0.1s linear; }
-
         #preview-container { display: none; margin-top: 15px; text-align: center; }
         #preview-image { max-width: 150px; max-height: 150px; border-radius: 8px; border: 2px solid #28a745; object-fit: cover; }
         #upload-success-text { color: #28a745; font-weight: bold; margin-top: 5px; display: block; }
-
         #screenshot-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; flex-direction: column; justify-content: center; align-items: center; }
         #screenshot-img { max-width: 90%; max-height: 70vh; border-radius: 10px; border: 3px solid #fff; }
         #screenshot-modal p { color: white; margin-top: 15px; font-size: 16px; text-align: center;}
         .close-modal-btn { margin-top: 10px; padding: 10px 20px; background: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-
         .error-msg { color: #dc3545; font-size: 13px; margin-top: 5px; display: none; font-weight: bold; }
         .input-error { border: 1px solid #dc3545 !important; background-color: #fff8f8; }
     </style>
@@ -84,22 +39,17 @@
 
     <div id="app-container">
         
-        <!-- Phase I: Input Screen -->
+        <!-- Phase I -->
         <section id="screen-phase-1" class="screen active">
-            <header class="app-header">
-                <h1>Ourname</h1>
-            </header>
-
+            <header class="app-header"><h1>FreshSafe</h1></header>
             <main class="content">
-                <div class="upload-section" id="ph-paper-upload" style="margin-bottom: 20px;">
+                <div class="upload-section" style="margin-bottom: 20px;">
                     <p>Please upload or take a picture of pH paper <span style="color:red;">*</span></p>
                     <input type="file" id="ph-paper-file-upload" accept="image/*" style="display: none;">
-                    
                     <div class="action-buttons" id="action-buttons-container">
                         <label for="ph-paper-file-upload" class="btn-style">📁 Upload from Gallery</label>
                         <button id="btn-go-to-camera" class="btn-style">📷 Take Photo</button>
                     </div>
-
                     <div id="preview-container">
                         <img id="preview-image" src="" alt="Uploaded pH Paper">
                         <span id="upload-success-text">✅ Image loaded successfully!</span>
@@ -133,42 +83,26 @@
             </main>
         </section>
 
-
-        <!-- Camera View (帶有取景框) -->
+        <!-- Camera View -->
         <section id="screen-camera" class="screen">
-            <header class="app-header">
-                <h1>Photo Taking</h1>
-            </header>
+            <header class="app-header"><h1>Photo Taking</h1></header>
             <main class="content camera-content">
                 <p class="camera-instruction">請將pH試紙放至白色膠片框裡<br>(Please align the pH paper in the frame)</p>
-                
                 <div class="camera-viewfinder">
                     <video id="camera-stream" autoplay playsinline></video>
                     <canvas id="camera-canvas" style="display: none;"></canvas>
-                    
-                    <!-- 新增：取景框遮罩層 -->
-                    <div class="camera-overlay">
-                        <div class="focus-frame" id="focus-frame"></div>
-                    </div>
+                    <div class="camera-overlay"><div class="focus-frame"></div></div>
                 </div>
-                
-                <button id="btn-capture" class="shutter-btn" aria-label="Take Photo">
-                    <span class="shutter-inner">📸 Take Photo</span>
-                </button>
+                <button id="btn-capture" class="shutter-btn">📸 Take Photo</button>
             </main>
         </section>
 
-
-        <!-- Phase II: Waiting / Processing Screen -->
+        <!-- Phase II -->
         <section id="screen-phase-2" class="screen">
-            <header class="app-header">
-                <h1>Ourname</h1>
-            </header>
+            <header class="app-header"><h1>FreshSafe</h1></header>
             <main class="content loading-content">
                 <h2>Please wait a moment</h2>
-                <div class="progress-container">
-                    <div class="progress-bar" id="progress-bar" style="width: 0%;"></div>
-                </div>
+                <div class="progress-container"><div class="progress-bar" id="progress-bar" style="width: 0%;"></div></div>
                 <div class="fun-fact-section">
                     <p>ℹ️ Do you know?</p>
                     <p id="fun-fact-text">Loading a fun fact...</p>
@@ -176,32 +110,24 @@
             </main>
         </section>
 
-
-        <!-- Phase III: Output / Result Screen -->
+        <!-- Phase III -->
         <section id="screen-phase-3" class="screen">
-            <header class="app-header">
-                <h1>Ourname</h1>
-            </header>
+            <header class="app-header"><h1>FreshSafe</h1></header>
             <main class="content result-content" id="capture-area" style="background: #f5f5f5; padding: 20px;">
                 <p id="confidence-text">We are <span id="confidence-value">--</span>% sure that the meat is</p>
-                
                 <div class="result-box status-default" id="result-box">
                     <h2 id="result-status">Waiting...</h2>
                 </div>
-
                 <div class="ph-value-section">
                     <p>ℹ️ pH ≈ <span id="ph-value">--</span></p>
-                    <!-- 新增：顯示 RGB 數據，證明程序真的讀取了 -->
                     <p style="font-size:12px; color:#666;">(Sampled RGB: <span id="rgb-value">--</span>)</p>
                 </div>
-
                 <div class="result-images">
                     <div class="image-container">
                         <p>pH picture:</p>
                         <div class="placeholder-img" id="result-ph-img" style="background:#ddd; height:100px; display:flex; align-items:center; justify-content:center; overflow: hidden; border-radius: 8px;">[Image Placeholder]</div>
                     </div>
                 </div>
-
                 <div class="result-actions" style="margin-top: 20px;">
                     <button id="btn-screenshot" class="secondary-btn">Take a screen shot</button>
                     <button id="btn-scan-again" class="primary-btn">Scan again</button>
@@ -214,13 +140,13 @@
             <img id="screenshot-img" src="" alt="Screenshot">
             <button class="close-modal-btn" id="btn-close-modal">Close</button>
         </div>
-
     </div>
 
     <script>
+        // ==========================================
+        // 1. 獲取元素
+        // ==========================================
         const screens = document.querySelectorAll('.screen');
-        
-        // Phase I 元素
         const fileUploadInput = document.getElementById('ph-paper-file-upload');
         const btnGoToCamera = document.getElementById('btn-go-to-camera');
         const btnSubmit = document.getElementById('btn-submit');
@@ -232,25 +158,16 @@
         const actionButtonsContainer = document.getElementById('action-buttons-container');
         const previewContainer = document.getElementById('preview-container');
         const previewImage = document.getElementById('preview-image');
-        
-        // 相機元素
         const videoElement = document.getElementById('camera-stream');
         const canvasElement = document.getElementById('camera-canvas');
         const btnCapture = document.getElementById('btn-capture');
-        const focusFrame = document.getElementById('focus-frame');
-        
-        // Phase II 元素
         const progressBar = document.getElementById('progress-bar');
         const funFactText = document.getElementById('fun-fact-text');
-        
-        // Phase III 元素
         const resultBox = document.getElementById('result-box');
         const resultStatus = document.getElementById('result-status');
         const phValueText = document.getElementById('ph-value');
         const confidenceValueText = document.getElementById('confidence-value');
-        const rgbValueText = document.getElementById('rgb-value'); // 新增
-        
-        // 截圖元素
+        const rgbValueText = document.getElementById('rgb-value');
         const btnScreenshot = document.getElementById('btn-screenshot');
         const screenshotModal = document.getElementById('screenshot-modal');
         const screenshotImg = document.getElementById('screenshot-img');
@@ -260,9 +177,6 @@
         let progressInterval = null;
         let hasUploadedImage = false; 
         let currentImageURL = null; 
-        
-        // 新增：存儲從取景框讀取到的 RGB 數據
-        let sampledRGB = { r: 0, g: 0, b: 0 };
 
         const funFacts = [
             "H₂O is good, but H₂O isn't good.",
@@ -278,6 +192,9 @@
             document.getElementById(screenId).classList.add('active');
         }
 
+        // ==========================================
+        // 2. 表單驗證邏輯
+        // ==========================================
         function validateForm() {
             let isValid = true;
             if (!hasUploadedImage) { errorPhoto.style.display = 'block'; isValid = false; } else { errorPhoto.style.display = 'none'; }
@@ -298,7 +215,9 @@
             if (this.value) { errorDate.style.display = 'none'; dateInput.classList.remove('input-error'); forgotDateCheckbox.checked = false; }
         });
 
-        // 1. 上傳照片
+        // ==========================================
+        // 3. 上傳照片
+        // ==========================================
         fileUploadInput.addEventListener('change', function(event) {
             if (event.target.files && event.target.files[0]) {
                 if (currentImageURL && currentImageURL.startsWith('blob:')) URL.revokeObjectURL(currentImageURL);
@@ -308,35 +227,19 @@
                 actionButtonsContainer.style.display = 'none';
                 hasUploadedImage = true;
                 errorPhoto.style.display = 'none';
-                
-                // 如果是上傳的照片，我們沒有取景框，就取中心區域模擬讀取 RGB
-                simulateUploadRGB();
             }
         });
 
-        // 模擬上傳圖片的RGB
-        function simulateUploadRGB() {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = img.width; canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-                // 取中心 10x10 像素
-                const centerX = img.width / 2; const centerY = img.height / 2;
-                const data = ctx.getImageData(centerX - 5, centerY - 5, 10, 10).data;
-                let r=0, g=0, b=0;
-                for(let i=0; i<data.length; i+=4) { r+=data[i]; g+=data[i+1]; b+=data[i+2]; }
-                sampledRGB = { r: Math.round(r/100), g: Math.round(g/100), b: Math.round(b/100) };
-            };
-            img.src = currentImageURL;
-        }
-
         btnSubmit.addEventListener('click', function() {
-            if (validateForm()) { generateResult(); showScreen('screen-phase-3'); }
+            if (validateForm()) { 
+                // 直接調用與後端的溝通函數
+                sendDataToBackend(currentImageURL); 
+            }
         });
 
-        // 2. 相機拍照
+        // ==========================================
+        // 4. 相機邏輯
+        // ==========================================
         btnGoToCamera.addEventListener('click', async function() {
             errorPhoto.style.display = 'none';
             let isValid = true;
@@ -349,83 +252,111 @@
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
                 videoElement.srcObject = stream;
-            } catch (err) { alert("无法訪問摄像頭，請確保在 HTTPS 環境下運行。"); }
+            } catch (err) { alert("无法访问摄像头，请确保在 HTTPS 环境下运行。"); }
         });
 
         function stopCamera() {
             if (stream) { stream.getTracks().forEach(track => track.stop()); videoElement.srcObject = null; }
         }
 
-        // 3. 點擊快門：截圖並提取取景框 RGB
         btnCapture.addEventListener('click', function() {
             if (!stream) return;
-
             const maxWidth = 800; 
             const videoWidth = videoElement.videoWidth;
             const videoHeight = videoElement.videoHeight;
-            
             let targetWidth = videoWidth; let targetHeight = videoHeight;
             if (videoWidth > maxWidth) {
                 targetWidth = maxWidth;
                 targetHeight = Math.round((videoHeight * maxWidth) / videoWidth);
             }
-
             canvasElement.width = targetWidth;
             canvasElement.height = targetHeight;
             const context = canvasElement.getContext('2d');
             context.drawImage(videoElement, 0, 0, targetWidth, targetHeight);
-            
-            // 保存整張照片供顯示
             currentImageURL = canvasElement.toDataURL('image/jpeg', 0.8);
-
-            // ==========================================
-            // 核心：提取取景框內的 RGB 值
-            // ==========================================
-            // 計算取景框在 canvas 中的位置 (取景框寬度是 60%)
-            const frameWidth = targetWidth * 0.6;
-            const frameHeight = targetWidth * 0.6; // 正方形
-            const startX = (targetWidth - frameWidth) / 2;
-            const startY = (targetHeight - frameHeight) / 2;
-
-            // 獲取該區域的像素數據
-            const imageData = context.getImageData(startX, startY, frameWidth, frameHeight);
-            const data = imageData.data;
-
-            // PRD 要求：獲取 5 個指定像素。我們取四個角和中心點。
-            const points = [
-                { x: Math.floor(frameWidth * 0.1), y: Math.floor(frameHeight * 0.1) }, // 左上
-                { x: Math.floor(frameWidth * 0.9), y: Math.floor(frameHeight * 0.1) }, // 右上
-                { x: Math.floor(frameWidth * 0.5), y: Math.floor(frameHeight * 0.5) }, // 中心
-                { x: Math.floor(frameWidth * 0.1), y: Math.floor(frameHeight * 0.9) }, // 左下
-                { x: Math.floor(frameWidth * 0.9), y: Math.floor(frameHeight * 0.9) }  // 右下
-            ];
-
-            let totalR = 0, totalG = 0, totalB = 0;
-            
-            points.forEach(p => {
-                // 計算該點在 imageData.data 中的索引
-                const idx = (p.y * frameWidth + p.x) * 4;
-                totalR += data[idx];
-                totalG += data[idx + 1];
-                totalB += data[idx + 2];
-            });
-
-            // 計算平均值
-            sampledRGB = { 
-                r: Math.round(totalR / 5), 
-                g: Math.round(totalG / 5), 
-                b: Math.round(totalB / 5) 
-            };
-
-            console.log("Sampled RGB:", sampledRGB);
-
             stopCamera();
-            showScreen('screen-phase-2');
-            startProcessing();
+            
+            // 拍照後直接發送給後端，不進入假的 Phase 2
+            sendDataToBackend(currentImageURL);
         });
 
-        // 4. Phase II 等待邏輯
-        function startProcessing() {
+        // ==========================================
+        // 5. 核心：與後端 API 對接
+        // ==========================================
+        async function sendDataToBackend(imageSrc) {
+            showScreen('screen-phase-2'); // 顯示等待頁面
+            startProgressBar(); // 啟動進度條動畫
+
+            try {
+                // 1. 準備 FormData
+                const formData = new FormData();
+                // 處理圖片
+                let imageBlob;
+                if (imageSrc.startsWith('blob:')) {
+                    const response = await fetch(imageSrc);
+                    imageBlob = await response.blob();
+                } else {
+                    const base64Data = imageSrc.split(',')[1];
+                    const byteCharacters = atob(base64Data);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) { byteNumbers[i] = byteCharacters.charCodeAt(i); }
+                    imageBlob = new Blob([new Uint8Array(byteNumbers)], {type: 'image/jpeg'});
+                }
+                formData.append('image', imageBlob, 'ph_paper.jpg');
+
+                // 處理表單數據
+                const selectedMeat = document.querySelector('input[name="meat_type"]:checked');
+                formData.append('is_kind_stated', selectedMeat ? true : false);
+                if (selectedMeat) formData.append('meat_type', selectedMeat.value);
+                
+                const isTimeStated = dateInput.value !== "" || forgotDateCheckbox.checked;
+                formData.append('is_time_stated', isTimeStated);
+                if (dateInput.value) formData.append('purchase_date', dateInput.value);
+
+                // 2. 發送給真實的後端 API
+                const API_URL = "https://pHnsafe.26650078.xyz/api/analyze"; 
+                const response = await fetch(API_URL, { method: 'POST', body: formData });
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                // 3. 解析後端返回的真實數據
+                const data = await response.json();
+                console.log("後端真實返回數據:", data);
+
+                // 4. 更新 Phase III 界面
+                phValueText.innerText = data.ph_value;
+                confidenceValueText.innerText = data.confidence_level;
+                resultStatus.innerText = data.status;
+                
+                // 根據狀態換顏色
+                let statusClass = "status-default";
+                if (data.status.toLowerCase() === "fresh") statusClass = "status-fresh";
+                else if (data.status.toLowerCase() === "edible") statusClass = "status-edible";
+                else if (data.status.toLowerCase() === "spoiled") statusClass = "status-spoiled";
+                resultBox.className = 'result-box ' + statusClass;
+
+                if (data.rgb_sampled) {
+                    rgbValueText.innerText = `R:${data.rgb_sampled.r}, G:${data.rgb_sampled.g}, B:${data.rgb_sampled.b}`;
+                }
+                if (currentImageURL) {
+                    document.getElementById('result-ph-img').innerHTML = `<img src="${currentImageURL}" style="width:100%; height:100%; object-fit:cover;">`;
+                }
+
+                // 5. 等待進度條跑滿，然後跳轉
+                finishProgressBarAndGoToResult();
+
+            } catch (error) {
+                console.error("連線後端失敗:", error);
+                alert("無法連接到後端伺服器，請確保後端已啟動，或稍後再試。");
+                clearInterval(progressInterval);
+                showScreen('screen-phase-1'); // 退回第一頁
+            }
+        }
+
+        // ==========================================
+        // 6. 進度條與等待邏輯
+        // ==========================================
+        function startProgressBar() {
             progressBar.style.width = '0%';
             funFactText.innerText = funFacts[Math.floor(Math.random() * funFacts.length)];
             let progress = 0;
@@ -433,63 +364,23 @@
 
             progressInterval = setInterval(() => {
                 progress += Math.random() * 5 + 1; 
-                if (progress >= 100) {
-                    progress = 100;
-                    progressBar.style.width = '100%';
+                if (progress >= 90) { // 最多跑到 90%，等後端返回再跑最後 10%
                     clearInterval(progressInterval);
-                    setTimeout(() => { generateResult(); showScreen('screen-phase-3'); }, 500);
                 } else {
                     progressBar.style.width = progress + '%';
                 }
             }, 100);
         }
 
-        // 5. 根據 RGB 生成結果 (模擬算法)
-        function generateResult() {
-            let mockPH = 7.0;
-            let mockConfidence = 85;
-            let statusText = "";
-            let statusClass = "";
-
-            // 簡單的模擬算法：根據 R 和 B 的比例決定 pH
-            // (僅供演示：一般試紙變紅偏酸，變藍/紫偏鹼)
-            const { r, g, b } = sampledRGB;
-            
-            // 如果沒讀到 RGB (比如純黑)，就用隨機值兜底
-            if (r === 0 && g === 0 && b === 0) {
-                mockPH = (Math.random() * 3 + 5.0).toFixed(1); 
-            } else {
-                // 這只是一個純前端的假算法，用 R 和 B 的差值來模擬 pH 變化
-                const diff = (b - r) / 255 * 3; 
-                mockPH = (6.5 + diff).toFixed(1);
-            }
-
-            // 限制 pH 範圍在 4.0 到 9.0 之間，防止算出來太離譜
-            mockPH = Math.max(4.0, Math.min(9.0, parseFloat(mockPH))).toFixed(1);
-
-            if (mockPH < 6.0) {
-                statusText = "Fresh"; statusClass = "status-fresh";
-            } else if (mockPH >= 6.0 && mockPH <= 6.8) {
-                statusText = "Edible"; statusClass = "status-edible";
-            } else {
-                statusText = "Spoiled"; statusClass = "status-spoiled";
-            }
-
-            // 更新 UI
-            phValueText.innerText = mockPH;
-            confidenceValueText.innerText = mockConfidence;
-            resultStatus.innerText = statusText;
-            resultBox.className = 'result-box ' + statusClass;
-            
-            // 顯示讀取到的 RGB
-            rgbValueText.innerText = `R:${sampledRGB.r}, G:${sampledRGB.g}, B:${sampledRGB.b}`;
-
-            if (currentImageURL) {
-                document.getElementById('result-ph-img').innerHTML = `<img src="${currentImageURL}" style="width:100%; height:100%; object-fit:cover;">`;
-            }
+        function finishProgressBarAndGoToResult() {
+            clearInterval(progressInterval);
+            progressBar.style.width = '100%';
+            setTimeout(() => { showScreen('screen-phase-3'); }, 500);
         }
 
-        // 6. 截圖
+        // ==========================================
+        // 7. 截圖與重置功能
+        // ==========================================
         btnScreenshot.addEventListener('click', function() {
             const captureArea = document.getElementById('capture-area');
             const resultActions = document.querySelector('.result-actions');
@@ -507,7 +398,6 @@
 
         btnCloseModal.addEventListener('click', function() { screenshotModal.style.display = 'none'; });
 
-        // 7. 重新掃描
         document.getElementById('btn-scan-again').addEventListener('click', function() {
             if (currentImageURL && currentImageURL.startsWith('blob:')) URL.revokeObjectURL(currentImageURL);
             currentImageURL = null; hasUploadedImage = false; fileUploadInput.value = ''; 
