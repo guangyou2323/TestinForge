@@ -1,7 +1,7 @@
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from PIL import Image
+from PIL import Image, ImageOps  # 這裡多加了一個 ImageOps，後面會解釋
 import io
 import random
 
@@ -39,13 +39,41 @@ class AnalysisResponse(BaseModel):
 # ==========================================
 def extract_rgb_from_image(image: Image.Image) -> dict:
     """
-    TODO: 【替換為你們真實的圖像處理代碼】
-    目前為 Mock 數據：隨機生成 RGB。
+    從圖片中央的取景框區域提取 5 個點的 RGB 值
     """
+    # 1. 確保圖片是 RGB 模式，並處理手機拍照的旋轉問題 (EXIF)
+    img = image.convert("RGB")
+    img = ImageOps.exif_transpose(img) # 解決 iPhone 橫豎屏照片方向不對的問題
+    
+    width, height = img.size
+    
+    # 2. 計算取景框區域 (前端設計為畫面寬度的 60%，正方形)
+    frame_size = int(width * 0.6)
+    start_x = (width - frame_size) // 2
+    start_y = (height - frame_size) // 2
+    
+    # 3. 定義 5 個取樣點（左上、右上、中心、左下、右下）
+    relative_points = [
+        (0.1, 0.1), (0.9, 0.1), (0.5, 0.5), (0.1, 0.9), (0.9, 0.9)
+    ]
+    
+    total_r, total_g, total_b = 0, 0, 0
+    
+    # 4. 讀取像素並加總
+    for rx, ry in relative_points:
+        actual_x = start_x + int(frame_size * rx)
+        actual_y = start_y + int(frame_size * ry)
+        
+        r, g, b = img.getpixel((actual_x, actual_y))
+        total_r += r
+        total_g += g
+        total_b += b
+        
+    # 5. 返回平均值
     return {
-        "r": random.randint(100, 200),
-        "g": random.randint(80, 150),
-        "b": random.randint(100, 200)
+        "r": total_r // 5,
+        "g": total_g // 5,
+        "b": total_b // 5
     }
 
 def calculate_ph(rgb: dict) -> float:
@@ -95,7 +123,7 @@ async def analyze_meat(
     contents = await image.read()
     img = Image.open(io.BytesIO(contents))
     
-    # 2. 提取 RGB 
+    # 2. 提取 RGB (現在會真實讀取像素了！)
     rgb = extract_rgb_from_image(img)
     
     # 3. 計算 pH 值和狀態
